@@ -43,6 +43,15 @@ namespace FoodInfoAPI.Controllers
         }
 
         [HttpGet]
+        public ActionResult GetFoodInfoByCategory(string category)
+        {
+            var foodResult = _foodDb.FoodCategories.Where(x =>
+                x.Category.ToLower() == category.ToLower()
+            ).ToList();
+            return Ok(foodResult.Select(x => x.ToDTO()));
+        }
+
+        [HttpGet]
         public ActionResult GetFoodCategories()
         {
             var foodResult = _foodDb.FoodCategories.Select(x => x.Category).Distinct().ToList();
