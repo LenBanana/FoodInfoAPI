@@ -33,6 +33,15 @@ namespace FoodInfoAPI
                 MariaDbServerVersion mariaDbServer = new MariaDbServerVersion("10.4.16");
                 o.UseLazyLoadingProxies().UseMySql(Configuration.GetConnectionString("MariaDB"), mariaDbServer);
             });
+            services.AddCors(o => {
+                o.AddPolicy("MyPolicy", builder =>
+                {
+                    builder.WithOrigins(new string[] { "http://localhost:4200", "https://localhost:4200", "https://dreckbu.de", "https://*.dreckbu.de", "https://dreckbu.de/*" })
+                           .AllowAnyMethod()
+                           .AllowAnyHeader()
+                           .AllowCredentials();
+                });
+            });
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
@@ -54,6 +63,7 @@ namespace FoodInfoAPI
             app.UseHttpsRedirection();
 
             app.UseRouting();
+            app.UseCors("MyPolicy");
 
             app.UseAuthorization();
 

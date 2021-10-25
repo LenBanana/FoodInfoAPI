@@ -1,6 +1,7 @@
 ﻿using FoodInfoAPI.DbContexts;
 using FoodInfoAPI.DTOModels;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,6 +16,13 @@ namespace FoodInfoAPI.Controllers
         public FoodController(FoodDbContext foodDb)
         {
             _foodDb = foodDb;
+        }
+
+        [HttpGet]
+        public ActionResult GetFoodRange(int skip)
+        {
+            var foodResult = _foodDb.FoodCategories.Include(x => x.Food).Skip(skip).Take(10).ToList();
+            return Ok(foodResult.Select(x => x.ToDTO()));
         }
 
         [HttpGet]
