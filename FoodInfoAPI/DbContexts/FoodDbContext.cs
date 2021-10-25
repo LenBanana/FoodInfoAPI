@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Pomelo.EntityFrameworkCore.MySql;
 using FoodInfoAPI.Models;
+using FoodInfoAPI.DTOModels;
 
 namespace FoodInfoAPI.DbContexts
 {
@@ -19,6 +20,7 @@ namespace FoodInfoAPI.DbContexts
         public DbSet<FoodCategory> FoodCategories { get; set; }
         public DbSet<Food> Food { get; set; }
         public DbSet<Carbohydrates> Carbohydrates { get; set; }
+        public DbSet<AddFoodDTO> AddedFood { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -37,6 +39,10 @@ namespace FoodInfoAPI.DbContexts
                 x.HasOne(y => y.Carbohydrates);
             });
             builder.Entity<Carbohydrates>(x =>
+            {
+                x.HasKey(y => y.ID);
+            });
+            builder.Entity<AddFoodDTO>(x =>
             {
                 x.HasKey(y => y.ID);
             });

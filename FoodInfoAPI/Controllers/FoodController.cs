@@ -1,7 +1,9 @@
 ﻿using FoodInfoAPI.DbContexts;
 using FoodInfoAPI.DTOModels;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,9 +15,11 @@ namespace FoodInfoAPI.Controllers
     public class FoodController : Controller
     {
         FoodDbContext _foodDb;
-        public FoodController(FoodDbContext foodDb)
+        IConfiguration Configuration;
+        public FoodController(FoodDbContext foodDb, IConfiguration config)
         {
             _foodDb = foodDb;
+            Configuration = config;
         }
 
         [HttpGet]
@@ -64,6 +68,45 @@ namespace FoodInfoAPI.Controllers
         {
             var foodResult = _foodDb.FoodCategories.Select(x => x.Category).Distinct().ToList();
             return Ok(new CategoriesDTO(foodResult));
+        }
+
+        [HttpGet]
+        public ActionResult GetAddedFood()
+        {
+            var foodResult = _foodDb.AddedFood.ToList();
+            return Ok(foodResult);
+        }
+
+        [HttpPost]
+        public ActionResult AddFoodToDB(string secret, [FromBody] AddFoodDTO food)
+        {
+            var foodPW = Configuration.GetSection("FoodSecret").Value;
+            if (secret == foodPW)
+            {
+                var entry = _foodDb.AddedFood.Add(food);
+                _foodDb.SaveChanges();
+                return Ok(new { successMsg = entry.Entity });
+            }
+            else
+            {
+                return StatusCode(StatusCodes.Status401Unauthorized, new { error = "Wrong password" });
+            }
+        }
+
+        [HttpPost]
+        public ActionResult RemoveFoodFromDB(string secret, [FromBody] AddFoodDTO food)
+        {
+            var foodPW = Configuration.GetSection("FoodSecret").Value;
+            if (secret == foodPW)
+            {
+                _foodDb.AddedFood.Remove(food);
+                _foodDb.SaveChanges();
+                return Ok(new { successMsg = "Successfully removed from DB" });
+            }
+            else
+            {
+                return StatusCode(StatusCodes.Status401Unauthorized, new { error = "Wrong password" });
+            }
         }
     }
 }
