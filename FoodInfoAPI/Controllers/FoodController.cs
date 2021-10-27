@@ -97,6 +97,8 @@ namespace FoodInfoAPI.Controllers
         [HttpPost]
         public ActionResult AddFoodToDB(string secret, [FromBody] AddFoodDTO food)
         {
+            if (food == null)
+                return StatusCode(401, "Send item was unvalid");
             var foodPW = Configuration.GetSection("FoodSecret").Value;
             if (secret == foodPW)
             {

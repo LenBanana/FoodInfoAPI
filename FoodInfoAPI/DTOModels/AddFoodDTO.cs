@@ -18,7 +18,7 @@ namespace FoodInfoAPI.DTOModels
 
         public AddFoodDTO()
         {
-            DateAdded = DateTime.Now;
+            //DateAdded = DateTime.Now;
         }
     }
 }
