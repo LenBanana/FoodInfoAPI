@@ -32,8 +32,31 @@ namespace FoodInfoAPI.Controllers
         [HttpGet]
         public ActionResult GetFoodInfoByName(string name)
         {
-            var foodResult = _foodDb.FoodCategories.Where(x => x.Food.Name.ToLower().Contains(name.ToLower())).ToList();
-            var result = foodResult.Select(x => x.ToDTO()).Take(100);
+            var foodResult = _foodDb.FoodCategories.Where(x => 
+                x.Food.Name.ToLower().Contains(name.ToLower())
+            ).ToList();
+            var result = foodResult.Select(x => x.ToDTO()).Take(250);
+            return Ok(new { Result = result, SearchCount = foodResult.Count });
+        }
+
+        [HttpGet]
+        public ActionResult GetFoodInfoByCategory(string category)
+        {
+            var foodResult = _foodDb.FoodCategories.Where(x =>
+                x.Category.ToLower() == category.ToLower()
+            ).ToList();
+            var result = foodResult.Select(x => x.ToDTO()).Take(250);
+            return Ok(new { Result = result, SearchCount = foodResult.Count });
+        }
+
+        [HttpGet]
+        public ActionResult GetFoodInfoByNameAndCategory(string name, string category)
+        {
+            var foodResult = _foodDb.FoodCategories.Where(x =>
+                x.Category.ToLower() == category.ToLower() &&
+                x.Food.Name.ToLower().Contains(name.ToLower())
+            ).ToList();
+            var result = foodResult.Select(x => x.ToDTO()).Take(250);
             return Ok(new { Result = result, SearchCount = foodResult.Count });
         }
 
@@ -41,7 +64,7 @@ namespace FoodInfoAPI.Controllers
         public ActionResult GetFoodInfoByCalories(double minCalories = double.MinValue, double maxCalories = double.MaxValue)
         {
             var foodResult = _foodDb.FoodCategories.Where(x => x.Food.Calories >= minCalories && x.Food.Calories <= maxCalories).ToList();
-            var result = foodResult.Select(x => x.ToDTO()).Take(100);
+            var result = foodResult.Select(x => x.ToDTO()).Take(250);
             return Ok(new { Result = result, SearchCount = foodResult.Count });
         }
 
@@ -53,17 +76,7 @@ namespace FoodInfoAPI.Controllers
                 x.Food.Calories >= minCalories &&
                 x.Food.Calories <= maxCalories
             ).ToList();
-            var result = foodResult.Select(x => x.ToDTO()).Take(100);
-            return Ok(new { Result = result, SearchCount = foodResult.Count });
-        }
-
-        [HttpGet]
-        public ActionResult GetFoodInfoByCategory(string category)
-        {
-            var foodResult = _foodDb.FoodCategories.Where(x =>
-                x.Category.ToLower() == category.ToLower()
-            ).ToList();
-            var result = foodResult.Select(x => x.ToDTO()).Take(100);
+            var result = foodResult.Select(x => x.ToDTO()).Take(250);
             return Ok(new { Result = result, SearchCount = foodResult.Count });
         }
 
