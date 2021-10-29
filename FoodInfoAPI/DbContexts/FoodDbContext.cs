@@ -46,6 +46,7 @@ namespace FoodInfoAPI.DbContexts
             {
                 x.HasKey(y => y.ID);
             });
+            builder.Entity<AddFoodDTO>().Property(x => x.TotalCalories).ValueGeneratedOnAdd();
         }
     }
 }

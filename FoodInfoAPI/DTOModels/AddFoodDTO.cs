@@ -15,6 +15,10 @@ namespace FoodInfoAPI.DTOModels
         public double Calories { get; set; }
         public string Name { get; set; }
         public DateTime DateAdded { get; set; }
+        public double Weight { get; set; }
+
+        [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
+        public double TotalCalories { get; private set; }
 
         public AddFoodDTO()
         {
