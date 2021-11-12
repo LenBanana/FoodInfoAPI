@@ -1,5 +1,6 @@
 ﻿using FoodInfoAPI.DbContexts;
 using FoodInfoAPI.DTOModels;
+using FoodInfoAPI.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -32,7 +33,7 @@ namespace FoodInfoAPI.Controllers
         [HttpGet]
         public ActionResult GetFoodInfoByName(string name)
         {
-            var foodResult = _foodDb.FoodCategories.Where(x => 
+            var foodResult = _foodDb.FoodCategories.Where(x =>
                 x.Food.Name.ToLower().Contains(name.ToLower())
             ).ToList();
             var result = foodResult.Select(x => x.ToDTO()).Take(250);
@@ -94,8 +95,15 @@ namespace FoodInfoAPI.Controllers
             return Ok(foodResult);
         }
 
+        [HttpGet]
+        public ActionResult GetAddedMeals()
+        {
+            var foodResult = _foodDb.Meals.ToList();
+            return Ok(foodResult);
+        }
+
         [HttpPost]
-        public ActionResult AddFoodToDB(string secret, [FromBody] AddFoodDTO food)
+        public ActionResult AddFoodToDB(string secret, [FromBody] AddFood food)
         {
             if (food == null)
                 return StatusCode(401, "Send item was unvalid");
@@ -113,7 +121,26 @@ namespace FoodInfoAPI.Controllers
         }
 
         [HttpPost]
-        public ActionResult RemoveFoodFromDB(string secret, [FromBody] AddFoodDTO food)
+        public ActionResult AddFoodsToDB(string secret, [FromBody] List<AddFood> food)
+        {
+            if (food == null)
+                return StatusCode(401, "Send item was unvalid");
+            var foodPW = Configuration.GetSection("FoodSecret").Value;
+            if (secret == foodPW)
+            {
+                food.ForEach(x => x.ID = 0);
+                _foodDb.AddedFood.AddRange(food);
+                _foodDb.SaveChanges();
+                return Ok(new { successMsg = food });
+            }
+            else
+            {
+                return StatusCode(StatusCodes.Status401Unauthorized, new { error = "Wrong password" });
+            }
+        }
+
+        [HttpPost]
+        public ActionResult RemoveFoodFromDB(string secret, [FromBody] AddFood food)
         {
             var foodPW = Configuration.GetSection("FoodSecret").Value;
             if (secret == foodPW)
@@ -121,6 +148,96 @@ namespace FoodInfoAPI.Controllers
                 _foodDb.AddedFood.Remove(food);
                 _foodDb.SaveChanges();
                 return Ok(new { successMsg = "Successfully removed from DB" });
+            }
+            else
+            {
+                return StatusCode(StatusCodes.Status401Unauthorized, new { error = "Wrong password" });
+            }
+        }
+
+        [HttpPost]
+        public ActionResult AddMealToDB(string secret, [FromBody] MealEaten meal)
+        {
+            if (meal == null)
+                return StatusCode(401, "Send item was unvalid");
+            var foodPW = Configuration.GetSection("FoodSecret").Value;
+            if (secret == foodPW)
+            {
+                var entry = _foodDb.Meals.Add(meal);
+                _foodDb.SaveChanges();
+                return Ok(new { successMsg = entry.Entity });
+            }
+            else
+            {
+                return StatusCode(StatusCodes.Status401Unauthorized, new { error = "Wrong password" });
+            }
+        }
+
+        [HttpPost]
+        public ActionResult RemoveMealFromDB(string secret, [FromBody] MealEaten meal)
+        {
+            if (meal == null)
+                return StatusCode(401, "Send item was unvalid");
+            var foodPW = Configuration.GetSection("FoodSecret").Value;
+            if (secret == foodPW)
+            {
+                _foodDb.Meals.Remove(meal);
+                _foodDb.SaveChanges();
+                return Ok(new { successMsg = "Successfully removed from DB" });
+            }
+            else
+            {
+                return StatusCode(StatusCodes.Status401Unauthorized, new { error = "Wrong password" });
+            }
+        }
+
+        [HttpPost]
+        public ActionResult AddFoodToMeal(string secret, [FromBody] MealAddDTO mealAdd)
+        {
+            if (mealAdd == null || mealAdd.FoodID == 0)
+                return StatusCode(401, "Send item was unvalid");
+            var foodPW = Configuration.GetSection("FoodSecret").Value;
+            if (secret == foodPW)
+            {
+                var meal = _foodDb.Meals.FirstOrDefault(x => x.ID == mealAdd.MealID);
+                if (meal == null)
+                    return StatusCode(401, "Could not find specified meal");
+                var food = _foodDb.AddedFood.FirstOrDefault(x => x.ID == mealAdd.FoodID);
+                if (food != null)
+                {
+                    meal.EatenFood.Add(food);
+                    _foodDb.SaveChanges();
+                    return Ok(new { successMsg = meal });
+                }
+                else
+                    return StatusCode(401, "Could not find specified food");
+            }
+            else
+            {
+                return StatusCode(StatusCodes.Status401Unauthorized, new { error = "Wrong password" });
+            }
+        }
+
+        [HttpPost]
+        public ActionResult RemoveFoodFromMeal(string secret, [FromBody] MealAddDTO mealRemove)
+        {
+            if (mealRemove == null || mealRemove.FoodID == 0)
+                return StatusCode(401, "Send item was unvalid");
+            var foodPW = Configuration.GetSection("FoodSecret").Value;
+            if (secret == foodPW)
+            {
+                var meal = _foodDb.Meals.FirstOrDefault(x => x.ID == mealRemove.MealID);
+                if (meal == null)
+                    return StatusCode(401, "Could not find specified meal");
+                var food = _foodDb.AddedFood.FirstOrDefault(x => x.ID == mealRemove.FoodID);
+                if (food != null)
+                {
+                    meal.EatenFood.Remove(food);
+                    _foodDb.SaveChanges();
+                    return Ok(new { successMsg = meal });
+                }
+                else
+                    return StatusCode(401, "Could not find specified food");
             }
             else
             {

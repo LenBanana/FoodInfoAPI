@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -69,5 +70,35 @@ namespace FoodInfoAPI.Models
         {
 
         }
+    }
+
+    public class AddFood
+    {
+        [Key]
+        public int ID { get; set; }
+        public string Category { get; set; }
+        public double Calories { get; set; }
+        public string Name { get; set; }
+        public DateTime DateAdded { get; set; }
+        public double Weight { get; set; }
+
+        [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
+        public double TotalCalories { get; private set; }
+
+        public AddFood()
+        {
+
+        }
+    }
+
+    public class MealEaten
+    {
+        [Key]
+        public int ID { get; set; }
+        public string Name { get; set; }
+        public DateTime DateAdded { get; set; }
+        public virtual List<AddFood> EatenFood { get; set; }
+        public virtual double TotalMealCalories => EatenFood.Sum(x => x.TotalCalories);
+        public virtual double TotalMealWeight => EatenFood.Sum(x => x.Weight);
     }
 }

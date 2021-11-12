@@ -20,7 +20,8 @@ namespace FoodInfoAPI.DbContexts
         public DbSet<FoodCategory> FoodCategories { get; set; }
         public DbSet<Food> Food { get; set; }
         public DbSet<Carbohydrates> Carbohydrates { get; set; }
-        public DbSet<AddFoodDTO> AddedFood { get; set; }
+        public DbSet<AddFood> AddedFood { get; set; }
+        public DbSet<MealEaten> Meals { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -42,11 +43,15 @@ namespace FoodInfoAPI.DbContexts
             {
                 x.HasKey(y => y.ID);
             });
-            builder.Entity<AddFoodDTO>(x =>
+            builder.Entity<AddFood>(x =>
             {
                 x.HasKey(y => y.ID);
             });
-            builder.Entity<AddFoodDTO>().Property(x => x.TotalCalories).ValueGeneratedOnAdd();
+            builder.Entity<MealEaten>(x =>
+            {
+                x.HasKey(y => y.ID);
+            });
+            builder.Entity<AddFood>().Property(x => x.TotalCalories).ValueGeneratedOnAdd();
         }
     }
 }
